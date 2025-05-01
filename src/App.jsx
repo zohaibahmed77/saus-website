@@ -14,13 +14,16 @@ import ProgramsPage from './pages/ProgramsPage';
 import AdmissionsPage from './pages/AdmissionsPage';
 import NewsPage from './pages/NewsPage';
 import ApplyPage from './pages/ApplyPage';
-import DashboardPage from './pages/DashboardPage'; // ✅ New DashboardPage import
+import DashboardPage from './pages/DashboardPage';
+import ContactPage from './pages/ContactPage';
+import AboutPage from './pages/AboutPage';
+import AdminLoginPage from "./admin/AdminLoginPage";
+import AdminDashboard from "./admin/AdminDashboard"; // ✅ fixed path here
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        {/* Homepage */}
         <Route
           index
           element={
@@ -34,15 +37,19 @@ function App() {
             </>
           }
         />
-
-        {/* Other Pages */}
         <Route path="departments" element={<DepartmentsPage />} />
         <Route path="programs" element={<ProgramsPage />} />
         <Route path="admissions" element={<AdmissionsPage />} />
         <Route path="news" element={<NewsPage />} />
         <Route path="apply" element={<ApplyPage />} />
-        <Route path="dashboard" element={<DashboardPage />} /> {/* ✅ Added dashboard route */}
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="about" element={<AboutPage />} />
       </Route>
+
+      {/* Admin Routes outside Layout */}
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ Import navigate hook
 import './HeroSection.css';
 
 const images = [
@@ -11,8 +12,9 @@ const images = [
 const HeroSection = () => {
   const [index, setIndex] = useState(0);
   const sliderRef = useRef(null);
+  const navigate = useNavigate(); // ✅ Initialize navigate
 
-  const allSlides = [...images, images[0]]; // clone 1st image at end
+  const allSlides = [...images, images[0]]; // Clone first image at end
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
@@ -34,7 +36,7 @@ const HeroSection = () => {
           sliderRef.current.style.transition = 'none';
           sliderRef.current.style.transform = `translateX(0%)`;
           setIndex(0);
-        }, 850); // wait until animation ends
+        }, 850); // Wait until animation ends
       }
     }
   };
@@ -65,7 +67,9 @@ const HeroSection = () => {
       <div className="slider-overlay">
         <h1>Empowering Minds, Shaping Futures</h1>
         <p>Welcome to Shaikh Ayaz University</p>
-        <button className="cta-button">Apply Now</button>
+        <button className="cta-button" onClick={() => navigate('/apply')}>
+          Apply Now
+        </button>
       </div>
 
       <div className="arrow left" onClick={prevSlide}>&#10094;</div>

@@ -9,11 +9,13 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: 50px;
   }
   
   .about-text {
     flex: 1;
+    min-width: 300px;
   }
   
   .about-text h2 {
@@ -46,6 +48,7 @@
   
   .about-image {
     flex: 1;
+    min-width: 300px;
   }
   
   .about-image img {
@@ -53,5 +56,31 @@
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     object-fit: cover;
+  }
+  
+  /* ✅ Mobile Responsive */
+  @media (max-width: 768px) {
+    .about-container {
+      flex-direction: column;
+      text-align: center;
+      gap: 30px;
+    }
+  
+    .about-text h2 {
+      font-size: 2rem;
+    }
+  
+    .about-text p {
+      font-size: 1rem;
+    }
+  
+    .about-btn {
+      font-size: 0.95rem;
+      padding: 10px 24px;
+    }
+  
+    .about-image {
+      order: -1; /* Show image first on mobile */
+    }
   }
   
