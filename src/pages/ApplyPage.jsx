@@ -1,14 +1,12 @@
 import './ApplyPage.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import db from '../firebase';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 const ApplyPage = () => {
   const navigate = useNavigate();
   const [view, setView] = useState('signin');
-  const [users, setUsers] = useState([
-    { email: 'admin@admin.com', password: 'admin', name: 'Admin' },
-  ]);
-
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -23,27 +21,49 @@ const ApplyPage = () => {
     setError('');
   };
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    const exists = users.find(u => u.email === form.email);
-    if (exists) return setError('User already exists.');
-    const newUser = {
-      email: form.email,
-      password: form.password,
-      name: `${form.firstName} ${form.lastName}`,
-    };
-    setUsers([...users, newUser]);
-    setForm({ email: '', password: '', firstName: '', lastName: '' });
-    setView('signin');
+
+    try {
+      const usersRef = collection(db, 'users');
+      const querySnapshot = await getDocs(usersRef);
+
+      const exists = querySnapshot.docs.find(doc => doc.data().email === form.email);
+      if (exists) return setError('User already exists.');
+
+      await addDoc(usersRef, {
+        name: `${form.firstName} ${form.lastName}`,
+        email: form.email,
+        password: form.password,
+      });
+
+      setForm({ email: '', password: '', firstName: '', lastName: '' });
+      setView('signin');
+    } catch (err) {
+      console.error(err);
+      setError('Error creating user.');
+    }
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    const user = users.find(
-      u => u.email === form.email && u.password === form.password
-    );
-    if (!user) return setError('Invalid credentials.');
-    navigate('/dashboard');
+
+    try {
+      const usersRef = collection(db, 'users');
+      const querySnapshot = await getDocs(usersRef);
+
+      const user = querySnapshot.docs.find(doc => {
+        const data = doc.data();
+        return data.email === form.email && data.password === form.password;
+      });
+
+      if (!user) return setError('Invalid credentials.');
+
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError('Error signing in.');
+    }
   };
 
   return (

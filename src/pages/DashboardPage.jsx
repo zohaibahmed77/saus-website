@@ -1,5 +1,7 @@
 import "./DashboardPage.css";
 import { useState, useEffect } from "react";
+import db from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const programs = [
   "BS Computer Science",
@@ -36,22 +38,13 @@ const DashboardPage = () => {
 
   const handleFormChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
-    setError(""); // reset error
+    setError("");
   };
 
   const validateForm = () => {
     const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      cnic,
-      matric,
-      inter,
-      board,
-      primary,
-      secondary,
-      third,
+      firstName, lastName, email, phone, cnic,
+      matric, inter, board, primary, secondary, third,
     } = formData;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,7 +66,7 @@ const DashboardPage = () => {
     return null;
   };
 
-  const handleApplicationSubmit = () => {
+  const handleApplicationSubmit = async () => {
     const validationError = validateForm();
     if (validationError) return setError(validationError);
 
@@ -87,6 +80,16 @@ const DashboardPage = () => {
     localStorage.setItem("applications", JSON.stringify(updated));
     setApplications(updated);
 
+    // ✅ Add to Firestore
+    try {
+      await addDoc(collection(db, "applications"), newApp);
+      console.log("Application saved to Firestore");
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+      alert("Something went wrong while saving to the database.");
+    }
+
+    // Reset form
     setFormData({
       firstName: "",
       lastName: "",
@@ -100,6 +103,7 @@ const DashboardPage = () => {
       secondary: "",
       third: "",
     });
+
     setStep(1);
     setActivePage("applications");
   };
@@ -157,21 +161,15 @@ const DashboardPage = () => {
               <div className="form-step">
                 <select value={formData.primary} onChange={(e) => handleFormChange("primary", e.target.value)}>
                   <option value="">Primary Choice Program</option>
-                  {programs.map((p, i) => (
-                    <option key={i} value={p}>{p}</option>
-                  ))}
+                  {programs.map((p, i) => <option key={i} value={p}>{p}</option>)}
                 </select>
                 <select value={formData.secondary} onChange={(e) => handleFormChange("secondary", e.target.value)}>
                   <option value="">Secondary Choice Program</option>
-                  {programs.map((p, i) => (
-                    <option key={i} value={p}>{p}</option>
-                  ))}
+                  {programs.map((p, i) => <option key={i} value={p}>{p}</option>)}
                 </select>
                 <select value={formData.third} onChange={(e) => handleFormChange("third", e.target.value)}>
                   <option value="">Third Choice Program</option>
-                  {programs.map((p, i) => (
-                    <option key={i} value={p}>{p}</option>
-                  ))}
+                  {programs.map((p, i) => <option key={i} value={p}>{p}</option>)}
                 </select>
                 <button onClick={() => setStep(2)}>Back</button>
                 <button onClick={handleApplicationSubmit}>Submit Application</button>

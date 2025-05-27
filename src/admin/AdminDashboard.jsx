@@ -1,21 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';   // ✅ import navbar
-import Footer from '../components/Footer';   // ✅ import footer
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import './AdminDashboard.css';
+
+import db from '../firebase';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const AdminDashboard = () => {
   const [applications, setApplications] = useState([]);
 
   useEffect(() => {
-    const storedApps = JSON.parse(localStorage.getItem('applications')) || [];
-    setApplications(storedApps);
+    const fetchApplications = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'applications'));
+        const apps = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setApplications(apps);
+      } catch (error) {
+        console.error('Error fetching applications:', error);
+      }
+    };
+
+    fetchApplications();
   }, []);
 
-  const handleStatusChange = (index, newStatus) => {
-    const updated = [...applications];
-    updated[index].status = newStatus;
-    setApplications(updated);
-    localStorage.setItem('applications', JSON.stringify(updated));
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const appRef = doc(db, 'applications', id);
+      await updateDoc(appRef, { status: newStatus });
+
+      // Update UI immediately
+      setApplications(prev =>
+        prev.map(app => app.id === id ? { ...app, status: newStatus } : app)
+      );
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   const approved = applications.filter(app => app.status === 'Approved').length;
@@ -23,7 +45,7 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <Navbar /> {/* ✅ NAVBAR */}
+      <Navbar />
 
       <div className="admin-dashboard">
         <h1>Admin Dashboard</h1>
@@ -48,8 +70,8 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {applications.map((app, index) => (
-                <tr key={index}>
+              {applications.map((app) => (
+                <tr key={app.id}>
                   <td>{app.firstName} {app.lastName}</td>
                   <td>{app.email}</td>
                   <td>{app.primary}</td>
@@ -58,7 +80,7 @@ const AdminDashboard = () => {
                   <td>
                     <select
                       value={app.status}
-                      onChange={(e) => handleStatusChange(index, e.target.value)}
+                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
                     >
                       <option value="Pending">Pending</option>
                       <option value="Approved">Approved</option>
@@ -72,7 +94,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <Footer /> {/* ✅ FOOTER */}
+      <Footer />
     </>
   );
 };
